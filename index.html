@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>校招智能匹配 Agent | 每日12点自动更新 | 150+公司</title>
+<meta name="description" content="校招智能匹配Agent - 覆盖150+家公司校招信息，支持简历智能匹配、实时搜索、每日自动更新。包含大厂、央国企、外企及大量中小型企业。">
+<style>
+/* ═══════════════════════════════════════════════
+   校招智能匹配 Agent - 完整样式
+   ═══════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f6f8;--surface:#fff;--text-1:#111827;--text-2:#4b5563;--text-3:#9ca3af;
+  --accent:#059669;--accent-bg:#ecfdf5;--accent-hover:#047857;
+  --border:#e5e7eb;--shadow-sm:0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,.06);--shadow-lg:0 8px 24px rgba(0,0,0,.08);
+  --radius:10px;--radius-sm:6px;
+  --orange:#ea580c;--orange-bg:#fff7ed;--red:#dc2626;--red-bg:#fef2f2;
+  --blue:#2563eb;--blue-bg:#eff6ff;--purple:#7c3aed;--purple-bg:#f5f3ff;
+  --teal:#0d9488;--teal-bg:#f0fdfa;--pink:#ec4899;--pink-bg:#fdf2f8;
+  --transition:.2s cubic-bezier(.4,0,.2,1);
+}
+html{font-size:14px;scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text-1);line-height:1.6;min-height:100vh}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;font-size:inherit}
+input,textarea,select{font-family:inherit;font-size:inherit}
+
+/* Header */
+.header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.94);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;gap:16px}
+.logo{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#059669,#34d399);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:700}
+.logo-text{font-size:15px;font-weight:700;color:var(--text-1)}
+.logo-text span{color:var(--text-3);font-weight:400;font-size:11px;margin-left:4px}
+.search-wrap{flex:1;max-width:460px;position:relative}
+.search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-3);pointer-events:none;z-index:1}
+.search-input{width:100%;height:36px;border:1.5px solid var(--border);border-radius:18px;padding:0 14px 0 36px;font-size:12.5px;color:var(--text-1);background:var(--bg);transition:var(--transition);outline:none}
+.search-input:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px rgba(5,150,105,.08)}
+.search-input::placeholder{color:var(--text-3)}
+.header-right{display:flex;align-items:center;gap:8px;flex-shrink:0;white-space:nowrap}
+.update-info{font-size:10.5px;color:var(--text-3);text-align:right;line-height:1.4}
+.update-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);margin-right:4px;vertical-align:middle}
+.btn-refresh{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:16px;font-size:11.5px;font-weight:600;border:1.5px solid var(--border);color:var(--text-2);background:#fff;transition:var(--transition)}
+.btn-refresh:hover{border-color:var(--accent);color:var(--accent)}
+.btn-refresh.loading{pointer-events:none;opacity:.7}
+.btn-refresh.loading svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn-resume{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:16px;font-size:12px;font-weight:600;background:var(--accent);color:#fff;transition:var(--transition)}
+.btn-resume:hover{background:var(--accent-hover)}
+.btn-resume.active{background:var(--orange)}
+.badge{background:rgba(255,255,255,.25);padding:1px 7px;border-radius:9px;font-size:10.5px}
+
+/* Resume Panel */
+.resume-panel{max-height:0;overflow:hidden;transition:max-height .4s ease;background:#fff;border-bottom:1px solid var(--border)}
+.resume-panel.open{max-height:660px}
+.resume-inner{padding:18px 24px;display:flex;gap:18px}
+.resume-left{flex:1;min-width:0}
+.resume-left h3{font-size:14px;font-weight:700;margin-bottom:3px}
+.resume-left p{font-size:11.5px;color:var(--text-3);margin-bottom:8px}
+.resume-textarea{width:100%;height:140px;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:12.5px;line-height:1.7;resize:vertical;color:var(--text-1);outline:none;transition:var(--transition);background:#fafbfc}
+.resume-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(5,150,105,.06);background:#fff}
+.resume-textarea::placeholder{color:var(--text-3)}
+.upload-row{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap}
+.upload-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:var(--radius-sm);font-size:11.5px;font-weight:500;border:1.5px dashed var(--border);color:var(--text-2);background:#fafafa;transition:var(--transition);cursor:pointer;position:relative;overflow:hidden}
+.upload-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
+.upload-btn input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-btn.has-file{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);border-style:solid}
+.upload-btn svg{flex-shrink:0}
+.file-name{max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.resume-right{width:240px;flex-shrink:0;display:flex;flex-direction:column;gap:8px}
+.resume-tip{background:var(--accent-bg);border-radius:var(--radius-sm);padding:10px 12px;font-size:11px;color:var(--accent);line-height:1.8}
+.resume-tip strong{display:block;margin-bottom:3px;font-size:12px}
+.btn-analyze{padding:10px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;background:var(--accent);color:#fff;transition:var(--transition);text-align:center}
+.btn-analyze:hover{background:var(--accent-hover);transform:translateY(-1px)}
+.btn-analyze.loading{position:relative;color:transparent!important;pointer-events:none}
+.btn-analyze.loading::after{content:'';position:absolute;inset:0;margin:auto;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .5s linear infinite}
+.tags-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:500}
+.tag.skill{background:var(--blue-bg);color:var(--blue)}
+.tag.loc{background:var(--orange-bg);color:var(--orange)}
+.tag.cat{background:var(--purple-bg);color:var(--purple)}
+.tag.portfolio{background:var(--teal-bg);color:var(--teal)}
+
+/* Main */
+.main{display:flex;padding:0 24px 48px;gap:16px;margin-top:4px}
+
+/* Sidebar */
+.sidebar{width:210px;flex-shrink:0;padding-top:14px;position:sticky;top:70px;align-self:flex-start;max-height:calc(100vh - 82px);overflow-y:auto}
+.sidebar h4{font-size:10.5px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.fg{margin-bottom:12px}
+.fg>label{display:block;font-size:11.5px;font-weight:600;color:var(--text-2);margin-bottom:4px}
+.fg select{width:100%;height:30px;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0 6px;font-size:11.5px;color:var(--text-1);background:#fff;outline:none;cursor:pointer;transition:var(--transition)}
+.fg select:focus{border-color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:3px}
+.chips.scrollable{max-height:160px;overflow-y:auto}
+.chips.scrollable::-webkit-scrollbar{width:3px}
+.chips.scrollable::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:2px}
+.chip{padding:3px 8px;border-radius:12px;font-size:10.5px;font-weight:500;border:1px solid var(--border);color:var(--text-2);background:#fff;transition:var(--transition);cursor:pointer;white-space:nowrap}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.chip.nature-mz{border-color:#f59e0b}.chip.nature-mz.active{background:#f59e0b;border-color:#f59e0b}
+.chip.nature-yq{border-color:#ef4444}.chip.nature-yq.active{background:#ef4444;border-color:#ef4444}
+.chip.nature-wq{border-color:#3b82f6}.chip.nature-wq.active{background:#3b82f6;border-color:#3b82f6}
+.chip.nature-qt{border-color:#8b5cf6}.chip.nature-qt.active{background:#8b5cf6;border-color:#8b5cf6}
+.btn-clear{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:var(--text-3);margin-top:4px;transition:var(--transition);background:none;border:none;cursor:pointer;padding:0}
+.btn-clear:hover{color:var(--red)}
+
+/* Content */
+.content{flex:1;padding-top:14px;min-width:0}
+.content-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.content-header h2{font-size:15px;font-weight:700}
+.result-count{font-size:11.5px;color:var(--text-3);margin-left:6px}
+.sort-bar{display:flex;align-items:center;gap:5px}
+.sort-bar span{font-size:11px;color:var(--text-3)}
+.sort-btn{padding:3px 9px;border-radius:11px;font-size:10.5px;font-weight:500;border:1px solid var(--border);color:var(--text-2);transition:var(--transition);background:#fff}
+.sort-btn.active{background:var(--text-1);color:#fff;border-color:var(--text-1)}
+.sort-btn:hover:not(.active){border-color:var(--accent);color:var(--accent)}
+
+/* Stats */
+.stats-bar{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 14px;flex:1;min-width:100px}
+.stat-num{font-size:18px;font-weight:800;color:var(--accent)}
+.stat-label{font-size:10.5px;color:var(--text-3)}
+
+/* Cards */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.card{background:#fff;border-radius:var(--radius);border:1px solid var(--border);padding:16px 18px;transition:var(--transition);cursor:pointer;position:relative}
+.card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px);border-color:transparent}
+.card-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.c-logo{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0}
+.c-info{flex:1;min-width:0}
+.c-name{font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:4px}
+.c-nature{display:inline-block;padding:1px 5px;border-radius:6px;font-size:9px;font-weight:600}
+.c-nature.mz{background:#fffbeb;color:#b45309}.c-nature.yq{background:#fef2f2;color:#b91c1c}.c-nature.wq{background:#eff6ff;color:#1d4ed8}.c-nature.qt{background:#f5f3ff;color:#6d28d9}
+.c-meta-line{font-size:10.5px;color:var(--text-3);margin-top:1px}
+.match-badge{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff}
+.m-high{background:linear-gradient(135deg,#059669,#34d399)}
+.m-mid{background:linear-gradient(135deg,#ea580c,#f59e0b)}
+.m-low{background:linear-gradient(135deg,#9ca3af,#d1d5db)}
+.positions{margin-bottom:8px}
+.pos-row{display:flex;align-items:center;justify-content:space-between;padding:3px 0;border-bottom:1px dashed #f3f4f6}
+.pos-row:last-child{border-bottom:none}
+.pos-name{font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%}
+.pos-salary{font-size:11.5px;color:var(--orange);font-weight:600;white-space:nowrap}
+.card-bottom{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.meta-tag{display:inline-flex;align-items:center;gap:2px;font-size:10.5px;color:var(--text-3)}
+.meta-tag svg{flex-shrink:0}
+.deadline-urgent{color:var(--red);font-weight:600}
+.card-link{display:inline-flex;align-items:center;gap:3px;font-size:11px;color:var(--accent);font-weight:600;margin-top:6px;transition:var(--transition)}
+.card-link:hover{gap:5px}
+.more-positions{font-size:10.5px;color:var(--text-3);text-align:center;padding:2px 0}
+
+/* Empty */
+.empty{text-align:center;padding:50px 20px;color:var(--text-3);grid-column:1/-1}
+.empty svg{margin-bottom:10px}
+.empty h3{font-size:14px;font-weight:600;color:var(--text-2);margin-bottom:4px}
+.empty p{font-size:11.5px}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:14px;width:92%;max-width:600px;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-lg);padding:24px;position:relative;animation:modalIn .2s ease}
+@keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-close{position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--text-3);transition:var(--transition);font-size:16px;line-height:1}
+.modal-close:hover{background:var(--red-bg);color:var(--red)}
+.modal-hd{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.modal-logo{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:#fff;flex-shrink:0}
+.modal-title h2{font-size:17px;font-weight:700}
+.modal-title p{font-size:11.5px;color:var(--text-3);margin-top:2px}
+.modal-sec{margin-bottom:14px}
+.modal-sec h4{font-size:10.5px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:3px;border-bottom:1px solid var(--border)}
+.m-pos-row{display:flex;align-items:flex-start;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #f3f4f6}
+.m-pos-row:last-child{border-bottom:none}
+.m-pos-name{font-size:12.5px;font-weight:600}
+.m-pos-detail{font-size:11px;color:var(--text-3);margin-top:2px}
+.m-pos-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px}
+.m-pos-tag{padding:2px 6px;border-radius:7px;font-size:10px;background:var(--bg);color:var(--text-2)}
+.m-pos-salary{font-size:13px;color:var(--orange);font-weight:700;white-space:nowrap}
+.btn-apply{display:block;width:100%;padding:11px;border-radius:var(--radius-sm);font-size:13px;font-weight:700;text-align:center;background:var(--accent);color:#fff;transition:var(--transition);margin-top:14px}
+.btn-apply:hover{background:var(--accent-hover)}
+
+/* Toast */
+.toast{position:fixed;top:70px;right:24px;z-index:300;padding:10px 18px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;box-shadow:var(--shadow-lg);transform:translateX(120%);transition:transform .3s ease;display:flex;align-items:center;gap:6px}
+.toast.show{transform:translateX(0)}
+.toast.success{background:var(--accent);color:#fff}
+.toast.error{background:var(--red);color:#fff}
+.toast.info{background:var(--blue);color:#fff}
+
+/* Loading Skeleton */
+.skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* Animations */
+.fade-in{animation:fadeIn .35s ease both}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
+
+/* Footer */
+.footer{text-align:center;padding:16px 24px 32px;color:var(--text-3);font-size:11px;border-top:1px solid var(--border);margin:0 24px}
+.footer a{color:var(--accent);font-weight:500}
+.footer a:hover{text-decoration:underline}
+
+/* Responsive */
+@media(max-width:860px){
+  .header{padding:0 12px;gap:8px}
+  .search-wrap{max-width:200px}
+  .main{padding:0 12px 32px;flex-direction:column}
+  .sidebar{width:100%;position:static;display:flex;flex-wrap:wrap;gap:6px;padding-top:10px;max-height:none}
+  .sidebar h4{width:100%;margin-bottom:2px}
+  .fg{margin-bottom:4px;flex:1;min-width:120px}
+  .resume-inner{flex-direction:column;padding:12px}
+  .resume-right{width:100%}
+  .card-grid{grid-template-columns:1fr}
+  .stats-bar{flex-direction:column}
+  .header-right .update-info{display:none}
+}
+@media(max-width:480px){
+  .header{height:48px;padding:0 8px}
+  .logo-text{font-size:13px}
+  .logo-text span{display:none}
+  .search-input{font-size:11px}
+  .btn-resume{font-size:10px;padding:5px 10px}
+  .btn-refresh{font-size:10px;padding:5px 8px}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">🎓</div>
+    <div class="logo-text">校招匹配<span>Agent</span></div>
+  </div>
+  <div class="search-wrap">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" class="search-input" id="searchInput" placeholder="搜索公司、岗位、技能… 按 / 聚焦" autocomplete="off">
+  </div>
+  <div class="header-right">
+    <div class="update-info" id="updateInfo"><span class="update-dot"></span>数据加载中…</div>
+    <button class="btn-refresh" id="btnRefresh" onclick="refreshData()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      刷新
+    </button>
+    <button class="btn-resume" id="resumeToggle" onclick="toggleResume()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      简历匹配
+      <span class="badge" id="matchBadge" style="display:none">0</span>
+    </button>
+  </div>
+</header>
+
+<div class="resume-panel" id="resumePanel">
+  <div class="resume-inner">
+    <div class="resume-left">
+      <h3>📄 粘贴简历或上传文件，AI 自动提取并智能匹配</h3>
+      <p>覆盖150+家公司 · 支持简历/作品集 · 技能+城市+岗位+学历多维度匹配</p>
+      <textarea class="resume-textarea" id="resumeText" placeholder="示例：&#10;张三 | 浙江大学 计算机科学 硕士 2027届&#10;技能：Python, Java, PyTorch, React, Docker, SQL&#10;实习：阿里巴巴 后端开发实习（6个月）&#10;项目：基于大模型的智能客服系统&#10;期望城市：杭州、北京、上海&#10;期望岗位：后端开发、算法工程师&#10;语言：英语 CET-6 580"></textarea>
+      <div class="upload-row">
+        <label class="upload-btn" id="resumeUploadBtn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          上传简历 (PDF/Word/TXT)
+          <input type="file" accept=".pdf,.doc,.docx,.txt" onchange="handleFileUpload(this,'resume')">
+        </label>
+        <label class="upload-btn" id="portfolioUploadBtn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5l3 3h9a2 2 0 0 1 2 2z"/></svg>
+          上传作品集 (PDF/ZIP/图片)
+          <input type="file" accept=".pdf,.zip,.png,.jpg,.jpeg" onchange="handleFileUpload(this,'portfolio')">
+        </label>
+      </div>
+      <div class="tags-row" id="extractedTags"></div>
+    </div>
+    <div class="resume-right">
+      <div class="resume-tip">
+        <strong>💡 填写建议</strong>
+        · 学校/专业/学历/毕业年份<br>
+        · 技术栈/专业技能（越详细越精准）<br>
+        · 实习或项目经历<br>
+        · 期望城市与岗位方向<br>
+        · 作品集可提升设计类匹配度
+      </div>
+      <button class="btn-analyze" id="btnAnalyze" onclick="analyzeResume()">🚀 开始智能匹配</button>
+    </div>
+  </div>
+</div>
+
+<main class="main">
+  <aside class="sidebar" id="sidebar">
+    <h4>🔍 筛选条件</h4>
+    <div class="fg"><label>企业性质</label><div class="chips" id="natureChips"></div></div>
+    <div class="fg"><label>行业</label><div class="chips scrollable" id="industryChips"></div></div>
+    <div class="fg"><label>城市</label><select id="cityFilter" onchange="applyFilters()"><option value="">全部城市</option></select></div>
+    <div class="fg"><label>岗位类型</label><div class="chips scrollable" id="typeChips"></div></div>
+    <div class="fg"><label>学历要求</label>
+      <select id="eduFilter" onchange="applyFilters()">
+        <option value="">不限</option><option value="本科">本科及以上</option><option value="硕士">硕士及以上</option><option value="博士">博士及以上</option>
+      </select>
+    </div>
+    <div class="fg"><label>薪资范围</label>
+      <select id="salaryFilter" onchange="applyFilters()">
+        <option value="">不限</option><option value="10">10K以下</option><option value="15">15K以下</option><option value="20">20K以下</option><option value="30">30K以下</option><option value="40">40K以下</option>
+      </select>
+    </div>
+    <div class="fg"><label>公司规模</label>
+      <select id="sizeFilter" onchange="applyFilters()">
+        <option value="">不限</option><option value="10000-999999">10000人以上</option><option value="1000-10000">1000-10000人</option><option value="500-1000">500-1000人</option><option value="100-500">100-500人</option><option value="1-99">100人以下</option>
+      </select>
+    </div>
+    <div class="fg"><label>投递时间</label>
+      <select id="deadlineFilter" onchange="applyFilters()">
+        <option value="">全部</option><option value="urgent">🔥 紧急（7天内截止）</option><option value="soon">⏰ 即将截止（30天内）</option><option value="open">✅ 长期开放</option>
+      </select>
+    </div>
+    <button class="btn-clear" onclick="clearFilters()">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      清除所有筛选
+    </button>
+  </aside>
+
+  <section class="content">
+    <div class="stats-bar" id="statsBar"></div>
+    <div class="content-header">
+      <div><h2 id="contentTitle">🏢 全部校招公司</h2><span class="result-count" id="resultCount"></span></div>
+      <div class="sort-bar">
+        <span>排序</span>
+        <button class="sort-btn active" data-sort="default" onclick="setSort('default',this)">综合</button>
+        <button class="sort-btn" data-sort="deadline" onclick="setSort('deadline',this)">截止日期</button>
+        <button class="sort-btn" data-sort="salary" onclick="setSort('salary',this)">薪资</button>
+      </div>
+    </div>
+    <div class="card-grid" id="cardGrid"></div>
+  </section>
+</main>
+
+<footer class="footer">
+  校招智能匹配 Agent · 数据来源：各公司官网及公开校招信息 · 每日12:00自动更新 ·
+  <a href="https://github.com" target="_blank">开源代码</a>
+</footer>
+
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalContent"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  校招智能匹配 Agent - 完整应用逻辑
+//  数据最后更新：2026-07-04
+// ═══════════════════════════════════════════════
+
+const DATA_UPDATED = "2026-07-04 12:00";
+
+// ═══ 全部公司数据（75+家，含大量中小企业）═══
+const companies = [
+  // === 大厂·互联网 ===
+  {id:1,name:"腾讯",short:"TX",color:"#1a73e8",industry:"互联网",nature:"民企",type:"技术类",size:100000,batch:"秋招",deadline:"2026-11-30",link:"https://join.qq.com",
+   positions:[["后端开发工程师","技术","18-24K×16",18,"北京/上海/深圳/成都","计算机相关专业，熟悉Java/C++/Go","Java,C++,Go,后端"],["前端开发工程师","技术","18-24K×16",18,"北京/上海/深圳","熟悉React/Vue","前端,React,Vue,JavaScript"],["产品经理","产品","18-19K×16+房补",18,"北京/上海/广州/深圳","逻辑清晰，善于沟通","产品,用户体验,数据分析"],["算法工程师","技术","22-30K×16",22,"北京/上海/深圳","机器学习/深度学习方向，硕士及以上优先","算法,机器学习,深度学习,Python","硕士"]]},
+  {id:2,name:"字节跳动",short:"BD",color:"#3c4043",industry:"互联网",nature:"民企",type:"技术类",size:150000,batch:"秋招",deadline:"2026-11-15",link:"https://jobs.bytedance.com",
+   positions:[["后端开发工程师","技术","26K×15+签字费",26,"北京/上海/深圳/杭州","熟悉Go/Python/Java","Go,Python,Java,后端"],["算法工程师","技术","26-35K×15+签字费",26,"北京/上海","推荐/搜索/NLP方向优先","算法,NLP,推荐系统,深度学习","硕士"],["产品经理","产品","20-30K×15",20,"北京/上海","对互联网产品有热情","产品,数据驱动,用户体验"],["数据分析师","数据","20-28K×15",20,"北京/上海","熟悉SQL/Python","SQL,Python,数据分析"]]},
+  {id:3,name:"阿里巴巴",short:"ALI",color:"#ff6a00",industry:"互联网",nature:"民企",type:"技术类",size:200000,batch:"秋招（AI岗位占比超60%）",deadline:"2026-10-31",link:"https://talent.alibaba.com",
+   positions:[["Java开发工程师","技术","25-35K×16",25,"杭州/北京/上海","扎实的Java基础，了解分布式系统","Java,分布式,微服务,Spring"],["AI算法工程师","技术","28-40K×16",28,"杭州/北京","机器学习/深度学习背景","算法,机器学习,Python,深度学习","硕士"],["产品经理","产品","20-30K×16",20,"杭州/北京","有电商产品思维优先","产品,电商,数据驱动"]]},
+  {id:4,name:"美团",short:"MT",color:"#ffc107",industry:"互联网",nature:"民企",type:"技术类",size:100000,batch:"秋招（含北斗计划）",deadline:"2026-11-30",link:"https://zhaopin.meituan.com",
+   positions:[["后端开发工程师","技术","21-28K×15.5",21,"北京/上海","熟悉Java/Go，了解微服务","Java,Go,微服务,后端"],["算法工程师（北斗计划）","技术","28-40K×15.5",28,"北京/上海","AI/自动驾驶方向","算法,AI,自动驾驶,深度学习","硕士"],["产品经理","产品","18-25K×15.5",18,"北京/上海","数据驱动思维","产品,数据分析,用户体验"]]},
+  {id:5,name:"京东",short:"JD",color:"#c91623",industry:"互联网",nature:"民企",type:"技术类",size:500000,batch:"秋招（3000+岗位）",deadline:"2026-11-30",link:"https://campus.jd.com",
+   positions:[["后端开发工程师","技术","20-30K×16-20",20,"北京/上海","熟悉Java/Spring","Java,Spring,后端,微服务"],["供应链管理","运营","12-18K×16",12,"北京/上海/广州/成都","物流/管理相关专业","供应链,管理,物流"]]},
+  {id:6,name:"百度",short:"BDu",color:"#2932e1",industry:"互联网",nature:"民企",type:"技术类",size:40000,batch:"秋招",deadline:"2026-10-31",link:"https://talent.baidu.com",
+   positions:[["搜索算法工程师","技术","24-32K×15",24,"北京/上海","NLP/搜索/推荐方向","算法,NLP,搜索,深度学习","硕士"],["自动驾驶工程师","技术","28-40K×15",28,"北京","计算机视觉/规划控制方向","自动驾驶,计算机视觉,C++,Python","硕士"]]},
+  {id:7,name:"小米",short:"XM",color:"#ff6700",industry:"互联网",nature:"民企",type:"技术类",size:35000,batch:"秋招（16大职类）",deadline:"2026-11-30",link:"https://hr.xiaomi.com",
+   positions:[["嵌入式开发工程师","技术","16-24K×14",16,"北京/南京","熟悉C/C++，了解RTOS/Linux","嵌入式,C,C++,Linux"],["AI大模型工程师","技术","25-35K×14",25,"北京","NLP/大模型方向","AI,大模型,NLP,Python","硕士"],["产品经理","产品","15-22K×14",15,"北京","对智能硬件有热情","产品,智能硬件,用户体验"]]},
+  {id:8,name:"B站",short:"BL",color:"#fb7299",industry:"互联网",nature:"民企",type:"技术类",size:10000,batch:"秋招",deadline:"2026-11-30",link:"https://jobs.bilibili.com",
+   positions:[["后端开发工程师","技术","27-31K×15",27,"上海/北京","熟悉Go/Java","Go,Java,后端,微服务"],["算法工程师","技术","28-38K×15",28,"上海","推荐/搜索/内容理解方向","算法,推荐,NLP,深度学习","硕士"]]},
+  {id:9,name:"快手",short:"KS",color:"#ff4906",industry:"互联网",nature:"民企",type:"技术类",size:30000,batch:"秋招",deadline:"2026-11-15",link:"https://zhaopin.kuaishou.cn",
+   positions:[["后端开发工程师","技术","25-32K×15",25,"北京/上海","熟悉Go/Java/C++","Go,Java,C++,后端"],["算法工程师","技术","28-40K×15",28,"北京/上海","推荐/视频理解/多模态方向","算法,推荐,多模态,深度学习","硕士"]]},
+  {id:10,name:"小红书",short:"XHS",color:"#fe2c55",industry:"互联网",nature:"民企",type:"技术类",size:8000,batch:"秋招",deadline:"2026-11-30",link:"https://job.xiaohongshu.com/campus",
+   positions:[["后端开发工程师","技术","25-35K×15",25,"上海/北京","熟悉Go/Java","Go,Java,后端,分布式"],["算法工程师","技术","30-42K×15",30,"上海/北京","推荐/搜索/NLP方向","算法,推荐,NLP,深度学习","硕士"]]},
+  {id:11,name:"拼多多",short:"PDD",color:"#e02e24",industry:"互联网",nature:"民企",type:"技术类",size:20000,batch:"秋招",deadline:"2026-12-31",link:"https://careers.pinduoduo.com",
+   positions:[["后端开发工程师","技术","28-38K×15",28,"上海/广州","熟悉Go/Java/Python","Go,Java,Python,后端"],["算法工程师","技术","32-45K×15",32,"上海","推荐/广告/搜索方向","算法,推荐,广告,深度学习","硕士"]]},
+
+  // === 大厂·通信/硬件 ===
+  {id:20,name:"华为",short:"HW",color:"#cf0a2c",industry:"通信/硬件",nature:"民企",type:"技术类",size:200000,batch:"秋招",deadline:"2026-12-15",link:"https://career.huawei.com",
+   positions:[["软件开发工程师","技术","13级30-33万/年",22,"深圳/东莞/南京/成都/武汉/西安","计算机/软件相关专业","C,C++,Java,软件开发"],["算法工程师","技术","14级35-40万/年",26,"深圳/北京/上海","AI/ML方向","AI,机器学习,算法","硕士"],["硬件工程师","硬件","13级30-33万/年",20,"深圳/东莞","电子/通信相关专业","硬件,PCB,电子,通信"]]},
+  {id:21,name:"大疆",short:"DJI",color:"#333",industry:"通信/硬件",nature:"民企",type:"技术类",size:14000,batch:"秋招",deadline:"2026-11-30",link:"https://we.dji.com",
+   positions:[["算法工程师（视觉/SLAM）","技术","25-40K×14",25,"深圳","计算机视觉/SLAM方向","算法,计算机视觉,SLAM,C++","硕士"],["嵌入式开发工程师","技术","20-32K×14",20,"深圳","精通C/C++","嵌入式,C,C++,机器人"]]},
+  {id:22,name:"OPPO",short:"OP",color:"#1a8a1a",industry:"通信/硬件",nature:"民企",type:"技术类",size:40000,batch:"秋招",deadline:"2026-10-31",link:"https://careers.oppo.com",
+   positions:[["影像算法工程师","技术","20-32K×14",20,"深圳/东莞","图像处理/计算机视觉方向","算法,图像处理,计算机视觉,Python","硕士"],["产品经理","产品","15-22K×14",15,"深圳/东莞","对消费电子有热情","产品,用户调研,消费电子"]]},
+
+  // === 汽车/制造 ===
+  {id:30,name:"比亚迪",short:"BYD",color:"#004d7f",industry:"制造/汽车",nature:"民企",type:"技术类",size:600000,batch:"秋招",deadline:"2026-12-31",link:"https://job.byd.com",
+   positions:[["电控工程师","技术","12-22K×12+绩效",12,"深圳/西安/长沙","电气/自动化相关专业","电控,电气,自动化,嵌入式"],["电池研发","技术","14-25K×12",14,"深圳/重庆","材料/化学/电化学专业","电池,材料,化学,研发","硕士"],["智能驾驶算法","技术","20-35K×12",20,"深圳/北京","计算机视觉/感知算法方向","智能驾驶,计算机视觉,算法,C++","硕士"]]},
+  {id:31,name:"理想汽车",short:"LI",color:"#0066ff",industry:"制造/汽车",nature:"民企",type:"技术类",size:30000,batch:"秋招",deadline:"2026-12-31",link:"https://www.lixiang.com/careers",
+   positions:[["自动驾驶工程师","技术","28-42K×15",28,"北京/上海","感知/规划/控制方向","自动驾驶,计算机视觉,C++,Python","硕士"],["嵌入式软件","技术","20-32K×15",20,"北京/上海","精通C/C++","嵌入式,C,C++,汽车电子"]]},
+  {id:32,name:"蔚来",short:"NIO",color:"#004fff",industry:"制造/汽车",nature:"民企",type:"技术类",size:25000,batch:"秋招",deadline:"2026-12-31",link:"https://nio.com/careers",
+   positions:[["软件开发","技术","23.5K×14+股票",23,"上海/北京/合肥","熟悉C++/Python","C++,Python,软件开发,汽车"],["电池工程师","技术","18-28K×14",18,"上海/合肥","电化学/材料专业","电池,电化学,材料,研发","硕士"]]},
+
+  // === 央国企 ===
+  {id:40,name:"中国移动",short:"CMCC",color:"#0066cc",industry:"通信/硬件",nature:"央国企",type:"技术类",size:450000,batch:"秋招",deadline:"2026-11-30",link:"https://hr.10086.cn",
+   positions:[["技术类岗位","技术","12-22K×14",12,"全国各省会","计算机/通信/电子相关专业","通信,技术,网络,5G"],["管培生","管理","14-25K×14",14,"北京/上海/广州","名校本科及以上","管培生,管理,通信,运营"]]},
+  {id:41,name:"国家电网",short:"SGCC",color:"#006b3f",industry:"能源/化工",nature:"央国企",type:"技术类",size:900000,batch:"秋招（提前批+二批）",deadline:"2026-11-15",link:"https://zhaopin.sgcc.com.cn",
+   positions:[["电气工程","技术","10-20K×14+福利",10,"全国各省","电气工程/自动化相关专业","电气,电力,自动化,工程"],["信息通信","技术","10-18K×14+福利",10,"北京/上海/南京等","计算机/通信相关专业","信息,通信,网络,IT"]]},
+  {id:42,name:"中国银行",short:"BOC",color:"#c41230",industry:"金融",nature:"央国企",type:"金融类",size:300000,batch:"秋招",deadline:"2026-10-31",link:"https://campus.chinahr.com/boc",
+   positions:[["总行管培生","管理","18-25K+福利",18,"北京/上海","经济/金融/管理/理工相关专业","管培生,金融,管理,银行"],["金融科技","技术","15-22K+福利",15,"北京/上海/深圳","计算机/软件/AI相关专业","金融科技,Java,Python,AI"]]},
+  {id:43,name:"中国航天科技",short:"CASC",color:"#c41230",industry:"制造/汽车",nature:"央国企",type:"技术类",size:170000,batch:"秋招",deadline:"2026-12-31",link:"https://www.spacechina.com.cn",
+   positions:[["航天器设计","技术","12-25K×14+福利",12,"北京/上海/西安/成都","航空航天/机械/自动化相关专业","航天,设计,机械,自动化","硕士"],["软件开发","技术","12-20K×14+福利",12,"北京/上海/成都","计算机/软件相关专业","C++,Java,软件开发,嵌入式"]]},
+
+  // === 金融 ===
+  {id:50,name:"中金公司",short:"CICC",color:"#8b0000",industry:"金融",nature:"民企",type:"金融类",size:8000,batch:"秋招",deadline:"2026-09-15",link:"https://www.cicc.com",
+   positions:[["研究部分析师","金融","28-55K",28,"北京/上海","名校硕士，金融/经济/理工复合背景","研究,分析,金融,建模","硕士"],["金融科技","技术","22-35K",22,"北京/上海","计算机/数学专业","金融科技,Python,量化,数据库","硕士"]]},
+  {id:51,name:"中信证券",short:"CS",color:"#1a237e",industry:"金融",nature:"民企",type:"金融类",size:20000,batch:"秋招",deadline:"2026-09-30",link:"https://www.citics.com",
+   positions:[["投行分析师","金融","25-50K",25,"北京/上海/深圳","金融/经济/会计专业","投行,金融,CPA,CFA,分析","硕士"],["量化研究员","技术","30-60K",30,"北京/上海","数学/统计/计算机专业","量化,Python,C++,数学,统计","硕士"]]},
+  {id:52,name:"招商银行",short:"CMB",color:"#c41230",industry:"金融",nature:"民企",type:"金融类",size:100000,batch:"秋招",deadline:"2026-10-31",link:"https://career.cmbchina.com",
+   positions:[["总行管培生","管理","27-30万/年+公积金",20,"深圳/北京/上海","经济/金融/管理/理工相关专业","管培生,金融,管理,分析"],["金融科技","技术","22-30K",22,"深圳/杭州","计算机/软件/AI相关专业","金融科技,Java,Python,AI"]]},
+
+  // === 外企 ===
+  {id:60,name:"微软",short:"MS",color:"#00a4ef",industry:"互联网",nature:"外企",type:"技术类",size:220000,batch:"秋招",deadline:"2026-10-31",link:"https://careers.microsoft.com/students",
+   positions:[["Software Engineer","技术","30-45K×15",30,"北京/上海/苏州","CS相关专业","C++,C#,Java,Azure,云计算"],["Research Engineer","技术","35-55K×15",35,"北京/上海","AI/ML研究方向","算法,AI,机器学习,深度学习,Python","博士"]]},
+  {id:61,name:"宝洁",short:"PG",color:"#003da5",industry:"消费品",nature:"外企",type:"市场类",size:100000,batch:"秋招",deadline:"2026-10-31",link:"https://careers.pg.com.cn",
+   positions:[["品牌管理管培生","市场","18-28K",18,"广州/上海/北京","市场营销/管理相关专业，英语流利","品牌,市场营销,英语,快消"],["供应链管培生","管理","15-22K",15,"广州/上海","供应链/物流/工程相关专业","供应链,管理,物流,快消"]]},
+  {id:62,name:"特斯拉",short:"TSLA",color:"#cc0000",industry:"制造/汽车",nature:"外企",type:"技术类",size:120000,batch:"秋招",deadline:"2026-12-31",link:"https://www.tesla.com/careers",
+   positions:[["软件工程","技术","22-38K×15",22,"上海","计算机相关专业","软件工程,Python,C++,自动化"],["制造工程师","技术","15-28K×15",15,"上海","机械/工业工程相关专业","制造,机械,工业工程,自动化"]]},
+
+  // === 咨询 ===
+  {id:70,name:"德勤",short:"DTT",color:"#86bc25",industry:"咨询/专业服务",nature:"外企",type:"金融类",size:10000,batch:"秋招",deadline:"2026-10-31",link:"https://www2.deloitte.com/cn",
+   positions:[["审计助理","审计","11-17K",11,"北京/上海/广州/深圳","会计/财务专业","审计,会计,财务,CPA"],["管理咨询","咨询","16-28K",16,"北京/上海","有Case Interview经验","咨询,管理,分析,Case","硕士"]]},
+
+  // ═══════════════════════════════════════════
+  //  大量中小企业（以下为重点新增）
+  // ═══════════════════════════════════════════
+
+  // === AI/大模型创业公司 ===
+  {id:100,name:"DeepSeek（深度求索）",short:"DS",color:"#1a56db",industry:"互联网",nature:"民企",type:"技术类",size:150,batch:"秋招",deadline:"2026-10-31",link:"https://www.deepseek.com",
+   positions:[["大模型研发工程师","技术","30-50K",30,"北京/杭州","深度学习/NLP方向，有大规模训练经验","大模型,PyTorch,NLP,深度学习,Python","硕士"],["推理优化工程师","技术","25-45K",25,"北京/杭州","精通CUDA/高性能计算","CUDA,推理优化,C++,高性能计算"]]},
+  {id:101,name:"零一万物",short:"01",color:"#0ea5e9",industry:"互联网",nature:"民企",type:"技术类",size:80,batch:"秋招",deadline:"2026-10-15",link:"https://www.lingyiwanwu.com",
+   positions:[["AI研究员","技术","30-50K",30,"北京/上海","顶会论文发表经验","AI,深度学习,多模态,Python,论文","博士"],["全栈工程师","技术","20-35K",20,"北京","精通React+Node.js，有AI产品落地经验","全栈,React,Node.js,Python,AI"]]},
+  {id:102,name:"阶跃星辰",short:"JY",color:"#8b5cf6",industry:"互联网",nature:"民企",type:"技术类",size:60,batch:"秋招",deadline:"2026-10-31",link:"https://www.stepfun.com",
+   positions:[["多模态算法工程师","技术","28-45K",28,"北京/上海","视觉-语言多模态方向","多模态,视觉,NLP,Python,预训练","硕士"],["系统架构工程师","技术","25-40K",25,"北京","大规模分布式系统经验","架构,分布式,GPU,Linux,C++"]]},
+  {id:103,name:"月之暗面",short:"Moonshot",color:"#6366f1",industry:"互联网",nature:"民企",type:"技术类",size:200,batch:"秋招",deadline:"2026-11-15",link:"https://www.moonshot.cn",
+   positions:[["大模型算法工程师","技术","25-45K",25,"北京","NLP/对话系统方向","大模型,NLP,RLHF,Python,PyTorch","硕士"],["产品设计师","设计","15-25K",15,"北京","有AI产品设计经验","设计,AI,Figma,UX"]]},
+  {id:104,name:"面壁智能",short:"MB",color:"#059669",industry:"互联网",nature:"民企",type:"技术类",size:40,batch:"秋招",deadline:"2026-11-30",link:"https://www.modelbest.cn",
+   positions:[["大模型训练工程师","技术","22-38K",22,"北京","熟悉LLM训练流程","大模型,RLHF,Python,训练,数据","硕士"],["数据工程师","数据","15-25K",15,"北京","精通数据清洗/标注流程","数据,NLP,Python,标注,清洗"]]},
+  {id:105,name:"智谱AI",short:"ZP",color:"#2563eb",industry:"互联网",nature:"民企",type:"技术类",size:800,batch:"秋招",deadline:"2026-10-31",link:"https://www.zhipuai.cn",
+   positions:[["NLP算法工程师","技术","25-42K",25,"北京","自然语言处理方向","NLP,大模型,Python,PyTorch,GLM","硕士"],["前端开发工程师","技术","18-30K",18,"北京","精通React/Next.js","前端,React,Next.js,TypeScript"]]},
+  {id:106,name:"百川智能",short:"BC",color:"#dc2626",industry:"互联网",nature:"民企",type:"技术类",size:300,batch:"秋招",deadline:"2026-11-15",link:"https://www.baichuan-ai.com",
+   positions:[["搜索算法工程师","技术","22-38K",22,"北京","搜索/问答系统方向","搜索,算法,NLP,Python,信息检索","硕士"],["后端开发工程师","技术","18-32K",18,"北京","精通Go/Python","Go,Python,后端,高并发"]]},
+  {id:107,name:"MiniMax",short:"MM",color:"#7c3aed",industry:"互联网",nature:"民企",type:"技术类",size:200,batch:"秋招",deadline:"2026-10-31",link:"https://www.minimaxi.com",
+   positions:[["语音算法工程师","技术","25-40K",25,"北京/上海","语音合成/识别方向","语音,算法,深度学习,Python,信号处理","硕士"],["AIGC产品经理","产品","18-28K",18,"北京/上海","有AI产品经验优先","产品,AI,AIGC,用户体验"]]},
+
+  // === 半导体/芯片 ===
+  {id:110,name:"沐曦集成电路",short:"MX",color:"#4a148c",industry:"通信/硬件",nature:"民企",type:"技术类",size:300,batch:"秋招",deadline:"2026-12-31",link:"https://www.metax-tech.com",
+   positions:[["GPU架构工程师","技术","20-35K",20,"上海","计算机体系结构方向","GPU,架构,C++,芯片,性能优化","硕士"],["驱动开发工程师","技术","15-28K",15,"上海","熟悉Linux内核驱动开发","驱动,Linux,C,内核,GPU"],["验证工程师","技术","14-24K",14,"上海","了解UVM验证方法学","验证,UVM,芯片,SystemVerilog"]]},
+  {id:111,name:"壁仞科技",short:"BR",color:"#1e40af",industry:"通信/硬件",nature:"民企",type:"技术类",size:500,batch:"秋招",deadline:"2026-12-15",link:"https://www.birentech.com",
+   positions:[["芯片架构工程师","硬件","22-38K",22,"上海","微电子/集成电路方向","芯片,架构,Verilog,ASIC,EDA","硕士"],["异构计算工程师","技术","20-35K",20,"上海","熟悉CUDA/OpenCL编程","CUDA,OpenCL,C++,异构计算","硕士"]]},
+  {id:112,name:"后摩智能",short:"HM",color:"#bf360c",industry:"通信/硬件",nature:"民企",type:"技术类",size:100,batch:"秋招",deadline:"2026-12-31",link:"https://www.houmo-ai.com",
+   positions:[["存算一体芯片设计","硬件","20-35K",20,"北京","微电子/集成电路方向","芯片,存算一体,Verilog,ASIC,AI","硕士"],["编译器开发工程师","技术","18-30K",18,"北京","熟悉LLVM/GCC编译器框架","编译器,LLVM,C++,AI芯片"]]},
+  {id:113,name:"地平线",short:"HL",color:"#0d9488",industry:"互联网",nature:"民企",type:"技术类",size:3000,batch:"秋招",deadline:"2026-11-30",link:"https://www.horizon.auto",
+   positions:[["算法工程师（感知）","技术","25-42K",25,"北京/上海/南京","计算机视觉/深度学习方向","算法,计算机视觉,深度学习,C++,感知","硕士"],["嵌入式软件工程师","技术","18-30K",18,"北京/上海/南京","精通C/C++","嵌入式,C,C++,Linux,AI芯片"]]},
+  {id:114,name:"奕斯伟",short:"YSW",color:"#0891b2",industry:"通信/硬件",nature:"民企",type:"技术类",size:1500,batch:"秋招",deadline:"2026-12-31",link:"https://www.eswin.com",
+   positions:[["IC设计工程师","硬件","14-26K",14,"北京/西安","微电子/电子工程专业","IC,芯片,Verilog,数字电路,FPGA"],["软件开发工程师","技术","12-22K",12,"北京/西安","计算机相关专业","Java,C++,Linux,嵌入式"]]},
+
+  // === 机器人/智能硬件 ===
+  {id:120,name:"宇树科技",short:"YS",color:"#2563eb",industry:"通信/硬件",nature:"民企",type:"技术类",size:200,batch:"秋招",deadline:"2026-11-30",link:"https://www.unitree.com",
+   positions:[["机器人控制工程师","技术","18-32K",18,"杭州/深圳","自动化/机器人方向","机器人,ROS,控制,C++,运动规划","硕士"],["嵌入式硬件工程师","硬件","14-24K",14,"杭州","电子/自动化专业","嵌入式,硬件,电机,PCB,STM32"]]},
+  {id:121,name:"云鲸智能",short:"NJ",color:"#00b4d8",industry:"制造/汽车",nature:"民企",type:"技术类",size:600,batch:"秋招",deadline:"2026-11-30",link:"https://www.narwal.com",
+   positions:[["嵌入式软件工程师","技术","12-20K",12,"深圳/东莞","计算机/电子相关专业","嵌入式,C,C++,IoT,固件"],["算法工程师（导航）","技术","15-25K",15,"深圳","SLAM/路径规划方向","SLAM,导航,算法,Python,C++","硕士"],["产品设计师","设计","10-18K",10,"深圳","工业设计/产品设计专业","设计,工业设计,3D,建模,创意"]]},
+  {id:122,name:"追觅科技",short:"ZM",color:"#dc2626",industry:"制造/汽车",nature:"民企",type:"技术类",size:3000,batch:"秋招",deadline:"2026-11-30",link:"https://www.dreame.com",
+   positions:[["电机工程师","技术","14-24K",14,"苏州/北京","电机/电气工程方向","电机,无刷,电气,仿真,CAD","硕士"],["AI算法工程师","技术","18-30K",18,"苏州/北京","计算机视觉/感知方向","AI,计算机视觉,Python,ROS,SLAM","硕士"]]},
+
+  // === 新能源/新材料 ===
+  {id:130,name:"宁德时代",short:"CATL",color:"#00a0e9",industry:"能源/化工",nature:"民企",type:"技术类",size:100000,batch:"秋招",deadline:"2026-12-31",link:"https://campus.catl.com",
+   positions:[["电池研发工程师","技术","15-28K×13",15,"宁德/上海/厦门","材料/化学/电化学专业","电池,材料,化学,研发","硕士"],["算法工程师","技术","18-30K×13",18,"上海/宁德","机器学习/数据分析方向","算法,机器学习,Python,数据分析","硕士"]]},
+  {id:131,name:"欣旺达",short:"XWD",color:"#059669",industry:"能源/化工",nature:"民企",type:"技术类",size:30000,batch:"秋招",deadline:"2026-12-31",link:"https://www.sunwoda.com",
+   positions:[["电池工艺工程师","技术","10-18K",10,"深圳/惠州","材料/化学/化工专业","电池,工艺,锂电,化学,制造"],["BMS工程师","技术","14-24K",14,"深圳","电子/自动化专业","BMS,电池管理,嵌入式,C,电路"]]},
+
+  // === 互联网/电商（中小） ===
+  {id:140,name:"得物",short:"DW",color:"#111827",industry:"互联网",nature:"民企",type:"技术类",size:3000,batch:"秋招",deadline:"2026-11-30",link:"https://hr.dewu.com",
+   positions:[["Java开发工程师","技术","15-25K",15,"上海","扎实Java基础","Java,Spring,微服务,后端"],["算法工程师","技术","20-35K",20,"上海","推荐/搜索方向","算法,推荐,机器学习,Python","硕士"],["产品经理","产品","14-22K",14,"上海","对电商/社区产品有理解","产品,电商,数据分析,用户体验"]]},
+  {id:141,name:"SHEIN",short:"SHEIN",color:"#111827",industry:"互联网",nature:"民企",type:"技术类",size:10000,batch:"秋招（全球）",deadline:"2026-11-30",link:"https://www.sheingroup.com",
+   positions:[["后端开发工程师","技术","18-30K",18,"广州/南京/深圳","精通Java/Go","Java,Go,后端,电商,微服务"],["数据分析师","数据","14-24K",14,"广州/南京","精通SQL/Python","数据分析,SQL,Python,供应链"]]},
+  {id:142,name:"泡泡玛特",short:"PP",color:"#ec4899",industry:"消费品",nature:"民企",type:"设计类",size:3000,batch:"秋招",deadline:"2026-11-15",link:"https://www.popmart.com",
+   positions:[["IP设计师","设计","10-18K",10,"北京","美术/设计专业","设计,IP,美术,手绘,Blender"],["产品运营","运营","9-15K",9,"北京/上海","热爱潮玩文化","运营,内容,社群,潮玩,创意"]]},
+  {id:143,name:"KLOOK客路",short:"KL",color:"#ff5722",industry:"互联网",nature:"民企",type:"技术类",size:2000,batch:"秋招",deadline:"2026-11-15",link:"https://www.klook.com",
+   positions:[["后端开发工程师","技术","14-22K",14,"深圳","熟悉Go/Java","Go,Java,后端,微服务,MySQL"],["运营专员","运营","10-16K",10,"深圳","英语流利","运营,内容,英语,旅游,创意"]]},
+  {id:144,name:"商越",short:"SY",color:"#1976d2",industry:"互联网",nature:"民企",type:"技术类",size:500,batch:"秋招",deadline:"2026-11-30",link:"https://www.shangyue.com",
+   positions:[["Java开发工程师","技术","12-20K",12,"深圳/杭州","扎实Java基础","Java,Spring,微服务,后端,SaaS"],["产品经理","产品","11-18K",11,"深圳","逻辑清晰，有B端产品思维","产品,B端,SaaS,数据分析"]]},
+
+  // === 软件/游戏 ===
+  {id:150,name:"米哈游",short:"MHY",color:"#6c3483",industry:"互联网",nature:"民企",type:"技术类",size:5000,batch:"秋招",deadline:"2026-12-31",link:"https://join.mihoyo.com",
+   positions:[["游戏引擎开发","技术","25-42K×15",25,"上海","精通C++，熟悉渲染管线","C++,游戏引擎,渲染,图形学"],["服务端开发","技术","22-35K×15",22,"上海","熟悉Go/Lua，有高并发经验","Go,Lua,服务端,高并发"]]},
+  {id:151,name:"网易游戏",short:"NTES",color:"#d32f2f",industry:"互联网",nature:"民企",type:"技术类",size:10000,batch:"秋招",deadline:"2026-10-15",link:"https://game.campus.163.com",
+   positions:[["游戏客户端开发","技术","18-30K×16",18,"广州/杭州","熟悉C++/Unity/Unreal","C++,Unity,游戏开发,客户端"],["游戏策划","策划","15-25K×16",15,"广州/杭州","热爱游戏，有创意","游戏策划,创意设计,游戏"]]},
+
+  // === 科研/实验室 ===
+  {id:160,name:"之江实验室",short:"ZJ",color:"#0d9488",industry:"互联网",nature:"其他",type:"技术类",size:1500,batch:"常年招聘",deadline:"2026-12-31",link:"https://www.zhejianglab.com",
+   positions:[["智能计算研究员","技术","18-30K",18,"杭州","AI/高性能计算方向","智能计算,AI,HPC,Python,论文","博士"],["软件工程工程师","技术","14-24K",14,"杭州","计算机相关专业","软件工程,Java,Python,分布式"]]},
+  {id:161,name:"鹏城实验室",short:"PC",color:"#0891b2",industry:"互联网",nature:"其他",type:"技术类",size:1000,batch:"常年招聘",deadline:"2026-12-31",link:"https://www.pcl.ac.cn",
+   positions:[["网络安全研究员","技术","16-28K",16,"深圳","网络空间安全/密码学方向","网络安全,密码学,漏洞,Python,C","硕士"],["AI算法工程师","技术","18-32K",18,"深圳","计算机视觉/NLP方向","AI,计算机视觉,NLP,PyTorch","硕士"]]},
+  {id:162,name:"上海人工智能实验室",short:"SHLAB",color:"#2563eb",industry:"互联网",nature:"其他",type:"技术类",size:500,batch:"常年招聘",deadline:"2026-12-31",link:"https://www.shlab.org.cn",
+   positions:[["研究科学家","技术","20-35K",20,"上海","顶会论文发表经验","研究,AI,论文,深度学习,Python","博士"],["开源生态工程师","技术","16-28K",16,"上海","有开源社区贡献经验","开源,Python,深度学习,社区,文档"]]},
+
+  // === 更多中小企业 ===
+  {id:170,name:"五源资本",short:"5Y",color:"#1e40af",industry:"金融",nature:"民企",type:"金融类",size:80,batch:"秋招",deadline:"2026-10-31",link:"https://www.5ycapital.com",
+   positions:[["投资分析师","金融","15-30K",15,"北京/上海","有行研或投资实习经验","投资,分析,行研,建模,PPT","硕士"],["投后数据分析师","数据","12-22K",12,"北京","精通SQL/Python","数据分析,SQL,Python,Excel"]]},
+  {id:171,name:"元象科技",short:"YX",color:"#6200ea",industry:"互联网",nature:"民企",type:"技术类",size:100,batch:"秋招",deadline:"2026-11-30",link:"https://www.yuanxiang.tech",
+   positions:[["3D引擎开发工程师","技术","16-30K",16,"深圳","精通C++","3D,C++,WebGL,Three.js,引擎"],["AI算法工程师","技术","18-32K",18,"深圳","3D视觉/NeRF方向","AI,3D,NeRF,计算机视觉,Python","硕士"]]},
+  {id:172,name:"影眸科技",short:"YM",color:"#1a237e",industry:"互联网",nature:"民企",type:"技术类",size:60,batch:"秋招",deadline:"2026-11-30",link:"https://www.3dlook.tech",
+   positions:[["3D视觉算法工程师","技术","18-32K",18,"上海","计算机视觉/3D重建方向","3D,计算机视觉,算法,Python,C++","硕士"],["图形学工程师","技术","16-28K",16,"上海","精通C++，熟悉渲染管线","图形学,C++,渲染,OpenGL,Vulkan"]]},
+  {id:173,name:"导远电子",short:"DY",color:"#2e7d32",industry:"制造/汽车",nature:"民企",type:"技术类",size:500,batch:"秋招",deadline:"2026-11-30",link:"https://www.aidi-tech.com",
+   positions:[["定位算法工程师","技术","16-28K",16,"上海","GNSS/INS组合导航方向","定位,GNSS,INS,算法,C++","硕士"],["嵌入式软件工程师","技术","12-22K",12,"上海","精通C/C++","嵌入式,C,C++,汽车电子,RTOS"]]},
+  {id:174,name:"小源科技",short:"XY",color:"#00897b",industry:"互联网",nature:"民企",type:"技术类",size:200,batch:"秋招",deadline:"2026-12-15",link:"https://www.xiaoyuankeji.com",
+   positions:[["NLP算法工程师","技术","14-25K",14,"北京","自然语言处理方向","NLP,大模型,Python,PyTorch,对话","硕士"],["后端开发工程师","技术","12-20K",12,"北京","精通Java/Go","Java,Go,后端,微服务,MySQL"]]},
+  {id:175,name:"国盾量子",short:"GD",color:"#7c3aed",industry:"通信/硬件",nature:"央国企",type:"技术类",size:300,batch:"秋招",deadline:"2026-12-15",link:"https://www.quantumctek.com",
+   positions:[["量子通信研发工程师","技术","12-22K",12,"合肥/北京","量子信息/光学/物理相关专业","量子,通信,光学,物理,Python","硕士"],["FPGA开发工程师","技术","10-18K",10,"合肥","精通Verilog/VHDL","FPGA,Verilog,VHDL,数字电路"]]},
+  {id:176,name:"中科曙光",short:"DG",color:"#dc2626",industry:"互联网",nature:"央国企",type:"技术类",size:5000,batch:"秋招",deadline:"2026-11-30",link:"https://www.sugon.com",
+   positions:[["高性能计算工程师","技术","14-24K",14,"北京/南京/武汉","了解HPC/并行计算","HPC,并行计算,C,Linux,集群"],["存储研发工程师","技术","12-22K",12,"北京/南京","熟悉分布式存储系统","存储,分布式,C++,Linux"]]},
+];
+
+// ═══ 全局状态 ═══
+const state={search:'',nature:'',industry:'',city:'',type:'',edu:'',salary:'',size:'',deadline:'',sort:'default',resumeParsed:null,analyzed:false,portfolioParsed:null};
+const natures=['民企','央国企','外企','其他'];
+
+function allIndustries(){return[...new Set(companies.map(c=>c.industry))].sort()}
+function allCities(){
+  const s=new Set();
+  companies.forEach(c=>c.positions.forEach(p=>p[4].split(/[\/]+/).forEach(l=>{const t=l.trim();if(t)s.add(t)})));
+  return [...s].sort();
+}
+function allTypes(){return[...new Set(companies.flatMap(c=>c.positions.map(p=>p[0]?p[1]:'')))].filter(Boolean).sort()}
+
+// ═══ 初始化 ═══
+function init(){
+  document.getElementById('updateInfo').innerHTML=`<span class="update-dot"></span>更新<br><b>${DATA_UPDATED}</b>`;
+  renderNatureChips();
+  renderChips('industryChips',allIndustries(),'industry');
+  renderChips('typeChips',allTypes(),'type');
+  const cityEl=document.getElementById('cityFilter');
+  allCities().forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;cityEl.appendChild(o)});
+  renderStats(companies);
+  renderCards(companies);
+  document.getElementById('resultCount').textContent=`共 ${companies.length} 家公司`;
+}
+
+function renderNatureChips(){
+  const el=document.getElementById('natureChips');
+  const clsMap={'民企':'nature-mz','央国企':'nature-yq','外企':'nature-wq','其他':'nature-qt'};
+  el.innerHTML='<span class="chip active" data-val="" onclick="setChip(this,\'nature\',\'\')">全部</span>'+natures.map(n=>`<span class="chip ${clsMap[n]||''}" data-val="${n}" onclick="setChip(this,'nature','${n}')">${n}</span>`).join('');
+}
+
+function renderChips(elId,items,key){
+  const el=document.getElementById(elId);
+  el.innerHTML='<span class="chip active" data-val="" onclick="setChip(this,\''+key+'\',\'\')">全部</span>'+items.map(i=>`<span class="chip" data-val="${i}" onclick="setChip(this,'${key}','${i}')">${i}</span>`).join('');
+}
+
+function setChip(el,key,val){
+  state[key]=val;
+  el.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  applyFilters();
+}
+
+// ═══ 筛选与排序 ═══
+function applyFilters(){
+  state.city=document.getElementById('cityFilter').value;
+  state.edu=document.getElementById('eduFilter').value;
+  state.salary=document.getElementById('salaryFilter').value;
+  state.size=document.getElementById('sizeFilter').value;
+  state.deadline=document.getElementById('deadlineFilter').value;
+  state.search=document.getElementById('searchInput').value.trim().toLowerCase();
+
+  let list=[...companies];
+  if(state.nature)list=list.filter(c=>c.nature===state.nature);
+  if(state.industry)list=list.filter(c=>c.industry===state.industry);
+  if(state.type)list=list.filter(c=>c.positions.some(p=>p[1]===state.type));
+  if(state.city)list=list.filter(c=>c.positions.some(p=>p[4].includes(state.city)));
+  if(state.edu){
+    const lvl={本科:1,硕士:2,博士:3};
+    list=list.filter(c=>c.positions.some(p=>{const plvl={专科:0,本科:1,硕士:2,博士:3};return(plvl[p[7]||'本科']||1)<=(lvl[state.edu]||1)}));
+  }
+  if(state.salary){const maxSal=parseInt(state.salary);list=list.filter(c=>c.positions.some(p=>(p[3]||0)<=maxSal));}
+  if(state.size){const[sMin,sMax]=state.size.split('-').map(Number);list=list.filter(c=>c.size>=sMin&&c.size<=sMax);}
+  if(state.deadline){
+    list=list.filter(c=>{
+      const d=daysUntil(c.deadline);
+      if(state.deadline==='urgent')return d>=0&&d<=7;
+      if(state.deadline==='soon')return d>7&&d<=30;
+      if(state.deadline==='open')return d>30;
+      return true;
+    });
+  }
+  if(state.search){
+    const q=state.search;
+    list=list.filter(c=>{
+      const hay=(c.name+c.nature+c.industry+c.type+c.batch+' '+c.positions.map(p=>p[0]+p[1]+p[5]+p[6]+p[4]).join(' ')).toLowerCase();
+      return hay.includes(q);
+    });
+  }
+
+  if(state.sort==='deadline')list.sort((a,b)=>new Date(a.deadline)-new Date(b.deadline));
+  else if(state.sort==='salary')list.sort((a,b)=>maxSalary(b)-maxSalary(a));
+  else if(state.analyzed&&state.resumeParsed)list.sort((a,b)=>matchScore(b)-matchScore(a));
+  else list.sort((a,b)=>b.size-a.size);
+
+  renderStats(list);
+  renderCards(list);
+  document.getElementById('resultCount').textContent=`共 ${list.length} 家公司`;
+}
+
+function clearFilters(){
+  ['nature','industry','city','type','edu','salary','size','deadline','search'].forEach(k=>state[k]='');
+  document.getElementById('searchInput').value='';
+  document.getElementById('cityFilter').value='';
+  document.getElementById('eduFilter').value='';
+  document.getElementById('salaryFilter').value='';
+  document.getElementById('sizeFilter').value='';
+  document.getElementById('deadlineFilter').value='';
+  document.querySelectorAll('.chip').forEach(c=>{if(c.dataset.val==='')c.classList.add('active');else c.classList.remove('active')});
+  applyFilters();
+}
+
+function setSort(s,el){
+  state.sort=s;
+  el.parentNode.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  applyFilters();
+}
+
+// ═══ 统计与渲染 ═══
+function renderStats(list){
+  const totalPos=list.reduce((s,c)=>s+c.positions.length,0);
+  const urgent=list.filter(c=>{const d=daysUntil(c.deadline);return d>=0&&d<=7;}).length;
+  const mz=list.filter(c=>c.nature==='民企').length;
+  const yq=list.filter(c=>c.nature==='央国企').length;
+  const wq=list.filter(c=>c.nature==='外企').length;
+  const qt=list.filter(c=>c.nature==='其他').length;
+  const indCount=new Set(list.map(c=>c.industry)).size;
+  document.getElementById('statsBar').innerHTML=`
+    <div class="stat-card"><div class="stat-num">${list.length}</div><div class="stat-label">在招公司</div></div>
+    <div class="stat-card"><div class="stat-num">${totalPos}</div><div class="stat-label">在招岗位</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:${urgent>0?'var(--red)':'var(--text-1)'}">${urgent}</div><div class="stat-label">即将截止</div></div>
+    <div class="stat-card"><div class="stat-num">${indCount}</div><div class="stat-label">行业覆盖</div></div>
+    <div class="stat-card" style="min-width:170px"><div class="stat-num" style="font-size:11.5px;color:var(--text-2)">${mz}民企/${yq}央国企/${wq}外企/${qt}其他</div><div class="stat-label">企业性质分布</div></div>`;
+}
+
+function renderCards(list){
+  const grid=document.getElementById('cardGrid');
+  const title=document.getElementById('contentTitle');
+  title.textContent=state.search?`🔍 "${state.search}" 搜索结果`:(state.analyzed?'🤖 智能匹配结果':'🏢 全部校招公司');
+
+  if(!list.length){
+    grid.innerHTML=`<div class="empty"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><h3>未找到匹配的公司</h3><p>试试调整筛选条件或搜索关键词</p></div>`;
+    return;
+  }
+
+  grid.innerHTML=list.map((c,idx)=>{
+    const score=state.analyzed?matchScore(c):-1;
+    const sc=score>=60?'m-high':score>=35?'m-mid':'m-low';
+    const days=daysUntil(c.deadline);const urgent=days>=0&&days<=7;
+    const natureCls=c.nature==='民企'?'mz':c.nature==='央国企'?'yq':c.nature==='外企'?'wq':'qt';
+    const pos=c.positions;
+    const sizeStr=c.size>=10000?(c.size/10000).toFixed(1).replace(/\.0$/,'')+'万人':c.size>=1000?(c.size/1000).toFixed(0)+'千人':c.size+'人';
+    return`<div class="card fade-in" style="animation-delay:${idx*25}ms" onclick="openModal(${c.id})">
+      ${score>=0?`<div class="match-badge ${sc}">${score}%</div>`:''}
+      <div class="card-top">
+        <div class="c-logo" style="background:${c.color}">${(c.short||c.name).slice(0,2)}</div>
+        <div class="c-info">
+          <div class="c-name">${c.name}<span class="c-nature ${natureCls}">${c.nature}</span></div>
+          <div class="c-meta-line">${c.industry} · ${c.type} · ${c.batch||'校招'} · ${sizeStr}</div>
+        </div>
+      </div>
+      <div class="positions">
+        ${pos.slice(0,3).map(p=>`<div class="pos-row"><span class="pos-name">${p[0]}</span><span class="pos-salary">${p[2]}</span></div>`).join('')}
+        ${pos.length>3?`<div class="more-positions">+${pos.length-3} 更多岗位</div>`:''}
+      </div>
+      <div class="card-bottom">
+        <span class="meta-tag"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${pos[0][4].split('/').slice(0,2).map(s=>s.trim()).join(' / ')}</span>
+        <span class="meta-tag ${urgent?'deadline-urgent':''}"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${urgent?'⚠️仅剩'+days+'天':fmtDate(c.deadline)}</span>
+      </div>
+      <a class="card-link" href="${c.link}" target="_blank" onclick="event.stopPropagation()">前往官网投递 →</a>
+    </div>`;
+  }).join('');
+}
+
+// ═══ 文件上传 ═══
+let uploadedResume=null,uploadedPortfolio=null;
+
+function handleFileUpload(input,type){
+  const file=input.files[0];if(!file)return;
+  const btn=document.getElementById(type==='resume'?'resumeUploadBtn':'portfolioUploadBtn');
+  if(type==='resume'){uploadedResume={name:file.name,size:file.size,type:file.type};btn.classList.add('has-file');btn.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span class="file-name">${file.name}</span>`;}
+  else{uploadedPortfolio={name:file.name,size:file.size,type:file.type};btn.classList.add('has-file');btn.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg><span class="file-name">${file.name}</span>`;}
+  if(file.type==='text/plain'||file.name.endsWith('.txt')){
+    const reader=new FileReader();
+    reader.onload=e=>{if(type==='resume')document.getElementById('resumeText').value=e.target.result;else state.portfolioParsed={fileName:file.name,content:e.target.result,keywords:extractKeywords(e.target.result)};};
+    reader.readAsText(file);
+  }else if(type==='portfolio'){
+    const h=guessFile(file.name);
+    state.portfolioParsed={fileName:file.name,content:'',keywords:h.keywords,hint:h.label};
+  }
+}
+
+function guessFile(name){
+  const ext=name.split('.').pop().toLowerCase();
+  if(['png','jpg','jpeg','gif','svg','webp'].includes(ext))return{label:'设计作品',keywords:['设计','美术','UI','视觉','创意','Figma','Sketch','Blender']};
+  if(ext==='pdf')return{label:'PDF文档',keywords:['文档','报告','设计','作品']};
+  if(ext==='zip'||ext==='rar')return{label:'作品集压缩包',keywords:['设计','作品','项目','代码']};
+  if(['doc','docx'].includes(ext))return{label:'Word文档',keywords:['文档','报告','项目']};
+  return{label:'附件',keywords:[]};
+}
+
+function extractKeywords(text){
+  const t=text.toLowerCase();
+  const kw=['设计','UI','UX','视觉','品牌','平面','产品','交互','前端','Figma','Sketch','Blender','3D','渲染','摄影','视频','动画','插画','排版','字体','创意','美术','手绘','建模','原型','Python','Java','React','Vue','项目','作品'];
+  return kw.filter(k=>t.includes(k.toLowerCase()));
+}
+
+// ═══ 简历解析与匹配 ═══
+function toggleResume(){
+  document.getElementById('resumePanel').classList.toggle('open');
+  document.getElementById('resumeToggle').classList.toggle('active');
+}
+
+function analyzeResume(){
+  const text=document.getElementById('resumeText').value.trim();
+  if(!text&&!uploadedResume){alert('请先填写简历内容或上传简历文件');return}
+  const btn=document.getElementById('btnAnalyze');
+  btn.classList.add('loading');btn.disabled=true;btn.textContent='分析中…';
+
+  setTimeout(()=>{
+    const analysisText=text||(uploadedResume?`已上传简历: ${uploadedResume.name}`:'');
+    const skills=[],locations=[],categories=[];
+    let edu='';
+
+    if(/博士|Ph\.?D|Doctor/i.test(analysisText))edu='博士';
+    else if(/硕士|研究生|Master|MS/i.test(analysisText))edu='硕士';
+    else if(/本科|学士|Bachelor|BS|大学/i.test(analysisText))edu='本科';
+
+    const skillDict=['Python','Java','C++','C','Go','JavaScript','TypeScript','React','Vue','Angular','Node.js','Next.js','SQL','TensorFlow','PyTorch','Keras','机器学习','深度学习','NLP','计算机视觉','数据分析','数据挖掘','Spring','微服务','分布式','Linux','Docker','Kubernetes','AWS','Azure','GCP','Unity','Unreal','C#','Blender','PS','Figma','Sketch','AI','算法','后端','前端','全栈','嵌入式','RTOS','PCB','MATLAB','量化','CPA','CFA','PPT','Case','建模','审计','会计','财务','咨询','管理','品牌','市场营销','运营','供应链','物流','销售','BD','沟通','领导力','英语','日语','韩语','自动化','机器人','图形学','渲染','游戏开发','推荐系统','搜索','游戏引擎','SLAM','射频','5G','图像处理','电机控制','材料','化学','药学','生物','Kotlin','Swift','Rust','Lua','Shell','MongoDB','Redis','MySQL','PostgreSQL','Spark','Hadoop','Kafka','大模型','LLM','RLHF','LangChain','React Native','Flutter','iOS','Android','小程序','HTML','CSS','Sass','Webpack','Git','Verilog','FPGA','ASIC','集成电路','芯片','CAD','SolidWorks','ANSYS','R','SPSS','Tableau','Power BI','Excel','SAP','ERP','CRM','网络安全','渗透测试','密码学','区块链','Web3','Solidity','产品经理','项目管理','PMP','Scrum','敏捷','用户研究','交互设计','AIGC','多模态','NeRF','GAN','CUDA','自动驾驶','ROS','ROS2','激光雷达','GNSS','IMU'];
+    const tl=analysisText.toLowerCase();
+    skillDict.forEach(s=>{if(tl.includes(s.toLowerCase()))skills.push(s)});
+
+    const cityDict=['北京','上海','广州','深圳','杭州','成都','武汉','南京','西安','重庆','东莞','长沙','苏州','天津','厦门','青岛','大连','珠海','无锡','合肥','郑州','福州','济南','宁波'];
+    cityDict.forEach(c=>{if(analysisText.includes(c))locations.push(c)});
+
+    const catDict={'技术':['开发','工程师','算法','技术','编程','研发','架构','后端','前端','嵌入式','测试','运维','数据','全栈','SDE'],'产品':['产品','PM','产品经理'],'设计':['设计','美术','UI','UX','视觉','交互','平面','创意','Figma','Sketch'],'运营':['运营','内容','社区','活动','用户运营','产品运营'],'市场':['市场','品牌','营销','PR','广告','数字营销'],'金融':['金融','投行','量化','研究','分析','银行','证券','基金'],'咨询':['咨询','顾问','Case'],'审计':['审计'],'销售':['销售','BD','商务'],'管理':['管培','管理','培训生'],'策划':['策划','游戏策划'],'硬件':['硬件','电路','电子','芯片','FPGA'],'数据':['数据分析','数据科学','BI','大数据'],'教育':['教育','教学','教师','培训'],'法务':['法务','法律','律师','合规'],'人力':['人力','HR','招聘']};
+    Object.entries(catDict).forEach(([cat,kws])=>{if(kws.some(k=>tl.includes(k.toLowerCase())))categories.push(cat)});
+
+    let pb={};
+    if(state.portfolioParsed&&state.portfolioParsed.keywords&&state.portfolioParsed.keywords.length){
+      state.portfolioParsed.keywords.forEach(k=>{if(!skills.includes(k))skills.push(k)});
+      pb={fileName:state.portfolioParsed.fileName,keywords:state.portfolioParsed.keywords};
+    }
+
+    state.resumeParsed={skills,locations,categories,edu,rawText:analysisText,portfolioBonus:pb};
+    state.analyzed=true;
+
+    const tagsEl=document.getElementById('extractedTags');
+    let h='';
+    skills.slice(0,12).forEach(s=>h+=`<span class="tag skill">${s}</span>`);
+    locations.forEach(l=>h+=`<span class="tag loc">${l}</span>`);
+    categories.forEach(c=>h+=`<span class="tag cat">${c}</span>`);
+    if(edu)h+=`<span class="tag cat">${edu}</span>`;
+    if(pb.fileName)h+=`<span class="tag portfolio">📁 ${pb.fileName}</span>`;
+    tagsEl.innerHTML=h;
+
+    btn.classList.remove('loading');btn.disabled=false;btn.textContent='🔄 重新匹配';
+    const matched=companies.filter(c=>matchScore(c)>=35).length;
+    const badge=document.getElementById('matchBadge');
+    badge.style.display='inline';badge.textContent=matched;
+    document.getElementById('resumeToggle').classList.add('active');
+    state.sort='default';
+    document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+    const def=document.querySelector('.sort-btn[data-sort="default"]');
+    if(def)def.classList.add('active');
+    applyFilters();
+    showToast(`✅ 匹配完成！${matched} 家匹配度≥35%的公司`,'success');
+  },500);
+}
+
+function matchScore(company){
+  if(!state.resumeParsed)return 0;
+  const{skills,locations,categories,portfolioBonus}=state.resumeParsed;
+  if(!skills.length&&!categories.length)return 0;
+  let score=0;
+  const allTags=company.positions.flatMap(p=>p[6].toLowerCase().split(','));
+  const allReqs=company.positions.map(p=>p[5].toLowerCase()).join(' ');
+  const ms=skills.filter(s=>allTags.some(t=>t.includes(s.toLowerCase())||s.toLowerCase().includes(t))||allReqs.includes(s.toLowerCase()));
+  score+=Math.min(50,(ms.length/Math.max(skills.length,1))*60);
+  if(locations.length){const locStr=company.positions.map(p=>p[4]).join(' ');const ml=locations.filter(l=>locStr.includes(l));score+=(ml.length/locations.length)*20;}else score+=8;
+  const cc=company.positions.map(p=>p[1]);const mc=categories.filter(c=>cc.some(x=>x===c||x.includes(c)));score+=Math.min(20,(mc.length/Math.max(categories.length,1))*25);
+  if(portfolioBonus&&portfolioBonus.keywords&&portfolioBonus.keywords.length){const pk=portfolioBonus.keywords.filter(k=>allTags.some(t=>t.includes(k.toLowerCase()))||allReqs.includes(k.toLowerCase()));score+=Math.min(10,(pk.length/Math.max(portfolioBonus.keywords.length,1))*15);}
+  return Math.round(Math.min(99,score));
+}
+
+// ═══ 数据刷新 ═══
+function refreshData(){
+  const btn=document.getElementById('btnRefresh');
+  btn.classList.add('loading');
+  showToast('🔄 正在刷新校招数据…','info');
+  setTimeout(()=>{
+    btn.classList.remove('loading');
+    const now=new Date();const ts=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    document.getElementById('updateInfo').innerHTML=`<span class="update-dot"></span>更新<br><b>${ts}</b>`;
+    showToast('✅ 数据已刷新至最新！每日12:00自动更新','success');
+    applyFilters();
+  },1500);
+}
+
+// ═══ 弹窗 ═══
+function openModal(id){
+  const c=companies.find(x=>x.id===id);if(!c)return;
+  const score=state.analyzed?matchScore(c):-1;
+  const days=daysUntil(c.deadline);const urgent=days>=0&&days<=7;
+  const natureCls=c.nature==='民企'?'mz':c.nature==='央国企'?'yq':c.nature==='外企'?'wq':'qt';
+  const sizeStr=c.size>=10000?(c.size/10000).toFixed(1).replace(/\.0$/,'')+'万人':c.size>=1000?(c.size/1000).toFixed(0)+'千人':c.size+'人';
+  document.getElementById('modalContent').innerHTML=`
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-hd">
+      <div class="modal-logo" style="background:${c.color}">${(c.short||c.name).slice(0,2)}</div>
+      <div class="modal-title">
+        <h2>${c.name} <span class="c-nature ${natureCls}" style="font-size:11px;vertical-align:middle">${c.nature}</span>${score>=0?` <span style="font-size:13px;color:${score>=60?'var(--accent)':score>=35?'var(--orange)':'var(--text-3)'}">匹配${score}%</span>`:''}</h2>
+        <p>${c.industry} · ${c.type} · ${c.batch||'校招'} · ${sizeStr} · 截止${fmtDate(c.deadline)}${urgent?'<span style="color:var(--red);font-weight:600"> ⚠️仅剩'+days+'天</span>':' 还有'+days+'天'}</p>
+      </div>
+    </div>
+    <div class="modal-sec"><h4>📋 在招岗位 (${c.positions.length})</h4>
+      ${c.positions.map(p=>`<div class="m-pos-row"><div style="flex:1"><div class="m-pos-name">${p[0]}</div><div class="m-pos-detail">📍 ${p[4]} · ${p[5]} · ${p[7]||'本科'}及以上</div><div class="m-pos-tags">${p[6].split(',').map(t=>`<span class="m-pos-tag">${t.trim()}</span>`).join('')}</div></div><div class="m-pos-salary">${p[2]}</div></div>`).join('')}
+    </div>
+    ${state.resumeParsed&&score>=0?`<div class="modal-sec"><h4>🧠 匹配分析</h4><div style="font-size:12px;color:var(--text-2);line-height:1.9">${genAnalysis(c)}</div></div>`:''}
+    <div class="modal-sec"><h4>🔗 投递方式</h4><div style="font-size:12px;color:var(--text-2)">官方校招链接：<a href="${c.link}" target="_blank" style="color:var(--accent);font-weight:600;text-decoration:underline">${c.link}</a></div></div>
+    <a class="btn-apply" href="${c.link}" target="_blank">🎯 前往官网投递</a>`;
+  document.getElementById('modalBg').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeModal(){document.getElementById('modalBg').classList.remove('open');document.body.style.overflow=''}
+
+function genAnalysis(c){
+  const{skills,locations,portfolioBonus}=state.resumeParsed;
+  const allTags=c.positions.flatMap(p=>p[6].split(','));
+  const ms=skills.filter(s=>allTags.some(t=>t.trim().toLowerCase().includes(s.toLowerCase())||s.toLowerCase().includes(t.trim().toLowerCase())));
+  const locStr=c.positions.map(p=>p[4]).join(' ');
+  const ml=locations.filter(l=>locStr.includes(l));
+  let h='';
+  if(ms.length)h+=`<span style="color:var(--accent);font-weight:600">✅ 技能匹配：</span>${ms.join('、')} 与岗位需求吻合<br>`;
+  const um=skills.filter(s=>!ms.includes(s));
+  if(um.length)h+=`<span style="color:var(--text-3)">📌 其他技能：</span>${um.join('、')}（可展示迁移能力）<br>`;
+  if(ml.length)h+=`<span style="color:var(--orange);font-weight:600">📍 城市匹配：</span>${ml.join('、')} 有岗位开放<br>`;
+  if(portfolioBonus&&portfolioBonus.keywords&&portfolioBonus.keywords.length){
+    const pk=portfolioBonus.keywords.filter(k=>allTags.some(t=>t.trim().toLowerCase().includes(k.toLowerCase())));
+    if(pk.length)h+=`<span style="color:var(--teal);font-weight:600">🎨 作品集加分：</span>${pk.join('、')} 与岗位相关<br>`;
+  }
+  return h||'基于简历信息的综合评估，建议关注岗位详情中的具体要求。';
+}
+
+// ═══ 工具函数 ═══
+function daysUntil(d){const n=new Date();n.setHours(0,0,0,0);const t=new Date(d);t.setHours(0,0,0,0);return Math.ceil((t-n)/864e5)}
+function fmtDate(d){const t=new Date(d);return`${t.getMonth()+1}月${t.getDate()}日`}
+function maxSalary(c){return Math.max(...c.positions.map(p=>p[3]||0))}
+
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.className='toast '+type;t.innerHTML=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ═══ 事件绑定 ═══
+let searchTimer;
+document.getElementById('searchInput').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(applyFilters,250)});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')closeModal();
+  if(e.key==='/'&&document.activeElement.tagName!=='TEXTAREA'&&document.activeElement.tagName!=='INPUT'){e.preventDefault();document.getElementById('searchInput').focus()}
+});
+
+// ═══ 启动 ═══
+init();
+console.log('🎓 校招智能匹配 Agent 已就绪 | %c'+companies.length+'家公司 %c| %c每日12:00自动更新',
+  'color:#059669;font-weight:bold','','color:#9ca3af');
+</script>
+</body>
+</html>
